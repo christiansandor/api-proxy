@@ -18,6 +18,9 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ env.NODE_VERSION }}
+      - name: Audit
+        run: |
+          npm audit
       - name: Install & build
         run: |
           NODE_ENV=development npm install
@@ -28,5 +31,5 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           tag: latest
           access: public
-          dry-run: true
+          dry-run: false
           check-version: true
