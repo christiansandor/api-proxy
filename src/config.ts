@@ -14,9 +14,19 @@ interface ICmd {
 }
 
 const cmd = yargs
-  .usage('Usage: api-proxy [-c config path]')
-  .alias('c', 'config')
-  .describe('config', 'Configuration YAML or JSON file')
+  .usage('Usage: api-proxy [-c config path] [-w]')
+  .option('config', {
+    type: 'string',
+    alias: 'c',
+    default: '',
+    describe: 'Configuration YAML or JSON file, defaults to api-proxy-config.yaml|yml',
+  })
+  .option('watch', {
+    type: 'boolean',
+    alias: 'w',
+    default: true,
+    describe: 'Keep the config updated on file change, defaults to true',
+  })
   .argv as unknown as ICmd;
 
 export class ConfigRoute {
@@ -68,22 +78,11 @@ export class Config {
 }
 
 const configSubject$ = new Subject<Config>();
+let configPath: string;
 
 const refreshConfig = () => {
-  const configPath = [cmd.config, 'api-proxy-config.yaml', 'api-proxy-config.yml'].filter(Boolean).find(path => {
-    try {
-      return !!lstatSync(getFullPath(path));
-    } catch (err) {
-      return false;
-    }
-  });
-
-  if (!configPath) {
-    throw new Error('No valid configuration provided.');
-  }
-
   try {
-    const content = readFileSync(getFullPath(configPath), 'utf8');
+    const content = readFileSync(configPath, 'utf8');
     const json = parse(content);
     const config = transformAndValidateSync(Config, json) as Config;
 
@@ -96,8 +95,24 @@ const refreshConfig = () => {
 export const config$ = configSubject$.asObservable();
 
 export function initConfig() {
-  refreshConfig();
-  watchFile(cmd.config, () => {
-    refreshConfig();
+  const p = [cmd.config, 'api-proxy-config.yaml', 'api-proxy-config.yml'].filter(Boolean).find(path => {
+    try {
+      return !!lstatSync(getFullPath(path));
+    } catch (err) {
+      return false;
+    }
   });
+
+  if (!p) {
+    throw new Error('No valid configuration provided.');
+  }
+
+  configPath = getFullPath(p);
+  refreshConfig();
+
+  if (cmd.watch) {
+    watchFile(configPath, () => {
+      refreshConfig();
+    });
+  }
 }
