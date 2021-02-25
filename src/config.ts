@@ -14,12 +14,9 @@ interface ICmd {
 }
 
 const cmd = yargs
-  .usage('Usage: api-proxy -c [config path] [-w]')
+  .usage('Usage: api-proxy [-c config path]')
   .alias('c', 'config')
   .describe('config', 'Configuration YAML or JSON file')
-  .alias('w', 'watch')
-  .boolean('watch')
-  .describe('watch', 'Keep the config updated on file change')
   .argv as unknown as ICmd;
 
 export class ConfigRoute {
@@ -100,10 +97,7 @@ export const config$ = configSubject$.asObservable();
 
 export function initConfig() {
   refreshConfig();
-
-  if (cmd.watch) {
-    watchFile(cmd.config, () => {
-      refreshConfig();
-    });
-  }
+  watchFile(cmd.config, () => {
+    refreshConfig();
+  });
 }

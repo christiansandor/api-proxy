@@ -1,6 +1,6 @@
 {
   "name": "@holdltd/api-proxy",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "API Proxy",
   "main": "dist/proxy.js",
   "scripts": {
