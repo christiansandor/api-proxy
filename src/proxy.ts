@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import 'reflect-metadata';
 import * as express from 'express';
 import * as morgan from 'morgan';
