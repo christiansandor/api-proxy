@@ -1,6 +1,6 @@
 import * as yargs from 'yargs';
 import { Subject } from 'rxjs';
-import { IsEnum, IsMimeType, IsNumber, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsBoolean, IsEnum, IsMimeType, IsNumber, IsOptional, IsString, IsUppercase, MinLength } from 'class-validator';
 import { Type } from 'class-transformer';
 import { METHODS } from 'http';
 import { lstatSync, readFileSync, watchFile } from 'fs';
@@ -34,6 +34,7 @@ export class ConfigRoute {
   readonly path: string;
 
   @IsEnum(METHODS)
+  @IsUppercase()
   readonly method: string;
 
   @IsOptional()
@@ -54,6 +55,21 @@ export class ConfigRoute {
   @IsOptional()
   @IsMimeType()
   readonly contentType: string;
+
+  @IsOptional()
+  @IsBoolean()
+  readonly useRegex = false;
+
+  private _regex: RegExp;
+
+  get regex(): RegExp {
+    if (this._regex) {
+      return this._regex;
+    }
+
+    this._regex = new RegExp(this.path.split('?')[0].replace(/\/$/, ''));
+    return this.regex;
+  }
 }
 
 export class Config {

@@ -31,9 +31,18 @@ router.use((req, res, next) => {
   }
 
   const url = req.url.split('?')[0].replace(/\/$/, '');
-  const route = config.routes.find(({ path, method }) => {
-    const configUrl = path.split('?')[0].replace(/\/$/, '');
-    return url === configUrl && req.method.toLowerCase() === method.toLowerCase();
+  const reqMethod = req.method.toUpperCase();
+  const route = config.routes.find(configRoute => {
+    const { path, useRegex, method } = configRoute;
+    if (reqMethod !== method) {
+      return false;
+    }
+
+    if (useRegex) {
+      return configRoute.regex.test(url);
+    }
+
+    return url === path.split('?')[0].replace(/\/$/, '');
   });
 
   if (!route) {
