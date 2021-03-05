@@ -14,5 +14,8 @@ routes:
     - path: /hello
       method: GET | POST | PUT | PATCH | DELETE | OPTIONS
       body?: string | json object
-      file: path
+      file?: path
+      statusCode?: number
+      useRegex?: boolean
+      delay?: number
 ```
