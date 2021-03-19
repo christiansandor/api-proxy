@@ -173,3 +173,7 @@ dist
 
 # Idea
 .idea
+
+# Api-proxy specific files
+api-proxy-config.yml
+api-proxy-config.yaml

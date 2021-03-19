@@ -1,14 +1,41 @@
-import { Config, config$, ConfigRoute } from './config';
-import { Request, Response, Router } from 'express';
+import { config$ } from './config';
+import { NextFunction, Request, Response, Router } from 'express';
+import * as queryString from 'querystring';
 import { parse } from 'querystring';
 import { getFullPath } from './utils';
+import { Config, ConfigRoute } from './dto/config.dto';
+import * as request from 'request';
 
 const router = Router();
 
 let config: Config;
 config$.subscribe(newConfig => config = newConfig);
 
-const handleRoute = (route: ConfigRoute, req: Request, res: Response) => {
+const handleRoute = (route: ConfigRoute, req: Request, res: Response, next: NextFunction) => {
+  if (route.proxyUrl) {
+    let qs: any;
+    if (route.proxyPassQuery) {
+      let proxyUrlQuery = route.proxyUrl.split('?').slice(1).join('?');
+      if (proxyUrlQuery) {
+        proxyUrlQuery = '?' + proxyUrlQuery;
+      }
+
+      qs = {
+        ...queryString.parse(proxyUrlQuery),
+        ...req.query as any,
+      };
+    }
+
+    req
+      .pipe(
+        request(route.proxyUrl, { qs })
+          .on('error', (error) => next(error)),
+      )
+      .pipe(res).on('error', (error) => next(error));
+
+    return;
+  }
+
   setTimeout(() => {
     if (route.statusCode) {
       res.status(route.statusCode);
@@ -34,7 +61,7 @@ router.use((req, res, next) => {
   const reqMethod = req.method.toUpperCase();
   const route = config.routes.find(configRoute => {
     const { path, useRegex, method } = configRoute;
-    if (reqMethod !== method) {
+    if (method && reqMethod !== method) {
       return false;
     }
 
@@ -58,7 +85,7 @@ router.use((req, res, next) => {
     }
   }
 
-  handleRoute(route, req, res);
+  handleRoute(route, req, res, next);
 });
 
 export { router };
