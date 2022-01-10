@@ -1,4 +1,4 @@
-import { IsBoolean, IsEnum, IsMimeType, IsNumber, IsOptional, IsString, IsUppercase, IsUrl, MinLength } from 'class-validator';
+import { IsBoolean, IsEnum, IsMimeType, IsNumber, IsObject, IsOptional, IsString, IsUppercase, IsUrl, MinLength } from 'class-validator';
 import { Type } from 'class-transformer';
 import { METHODS } from 'http';
 
@@ -48,7 +48,7 @@ export class ConfigRoute {
       return this._regex;
     }
 
-    this._regex = new RegExp(this.path.split('?')[0].replace(/\/$/, ''));
+    this._regex = new RegExp(this.path);
     return this.regex;
   }
 }
@@ -72,4 +72,8 @@ export class Config {
 
   @Type(() => ConfigRoute)
   readonly routes: ConfigRoute[];
+
+  @IsOptional()
+  @IsObject()
+  readonly cache: object = {};
 }
