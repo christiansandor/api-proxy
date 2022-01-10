@@ -110,7 +110,7 @@ router.use((req, res, next) => {
       return false;
     }
 
-    const qs = route.path.split('?').slice(1).join('?');
+    const qs = configRoute.path.split('?').slice(1).join('?');
     if (qs) {
       const query = parse(qs);
       const every = Object.keys(query).every(queryKey => query[queryKey] === req.query[queryKey]);

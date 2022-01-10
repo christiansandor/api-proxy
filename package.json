@@ -1,6 +1,6 @@
 {
   "name": "@holdltd/api-proxy",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "API Proxy",
   "main": "dist/api-proxy.js",
   "author": "Sándor Krisztián <contact@christiansandor.com>",
